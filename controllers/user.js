@@ -1,39 +1,35 @@
 const async = require("async");
-const res = require("express/lib/response");
+// const res = require("express/lib/response");
 const userModel = require("../models/user");
 const userAddModel = require("../models/userAddress");
+const mongoose = require('mongoose');
 
-function getUsers(){
-    console.log("hello")
-    async.waterfall([
-        function(cb){
-            let a = userModel.find({},(res)=>{
-                cb(null,res);
-            });
-        },
-        function(arg,cb){
-            let a = userAddModel.find({},(res)=>{
-                cb(null,res,arg);
-            });
-        }
-    ],(err, add, user)=>{
-        if(err){
-            res.status(400).json({success:false,err:err})
+function getUsers(req,res) {
+
+
+
+    console.log("getusers");
+
+    
+    userModel.find({}), function (err, docs) {
+        console.log("users")
+        if (err){
+            console.log(err);
+            res.send("error");
         }
         else{
-            let data = {
-                address: add,
-                Users: user
-            }
-            res.status(200).json({success:true,data:data});
+            console.log("First function call : ", docs);
+            
+            res.send(docs);
+            
+          
         }
-    })
+    }
 }
 
-
 module.exports = {
-    getUsers,
-    // getUser,
-    // getUsername,
-    // addUser,
-  };
+  getUsers,
+  // getUser,
+  // getUsername,
+  // addUser,
+};
