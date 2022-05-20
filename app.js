@@ -1,14 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
+const userRoutes = require('./routes/user');
 
-mongoose.connect('mongodb://localhost:27017/userDetailss',
+mongoose.connect('mongodb://localhost:27017/userDetails',
   {
     useNewUrlParser: true
     
   }
 );
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-var date = new Date()
+app.use('/api/v1',userRoutes);
 
-console.log(date);
+app.listen(3000);
+
