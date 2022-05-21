@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
     status: {
         type: Boolean,
         required: false
-    },
+    },   
     Datecreated: {
         type: Date,
         default: Date.now

@@ -1,4 +1,5 @@
 const async = require("async");
+const { status } = require("express/lib/response");
 const res = require("express/lib/response");
 const userModel = require("../models/user");
 const userAddModel = require("../models/userAddress");
@@ -176,7 +177,6 @@ function getUsers(req, res) {
       //   );
       // },
 
-
       // ------------------------------findOneAndDelete---------------------------------
       // function (cb) {
       //   userModel.remove({ age: { $gte: 11 } }, function (err, findOneAnddelete) {
@@ -190,8 +190,6 @@ function getUsers(req, res) {
       //     }
       //   );
       // },
-
-
 
       //find
       function (cb) {
@@ -229,13 +227,43 @@ function getUsers(req, res) {
     }
   );
 }
+//------------------------------------post---------------------------------------------------------------
+function addUsers(req, res) {
+  console.log(req.body);
+  const user = new userModel(req.body);
 
-// function addUsers(req, res) {
-//   console.log("req.body", req.body);
-//   console.log("req.query", req.query);
-//   console.log("req.params", req.params);
-//   res.send("post request");
-// }
+  user.save().then(() => {
+      res.status(201).send(user);
+    }).catch((e) => {
+      res.status(400).send(e);
+    });
+
+// --------------------------------------------------------------------------------------------
+  // let username = req.body.name;
+  // let status = req.body.status;
+  // let Datecreated = req.body.Datecreated;
+  // let DateModified = req.body.DateModified;
+  // let id = userModel.length + 1;
+
+  // let resultData = {
+  //   name: username,
+  //   status: status,
+  //   Datecreated:Datecreated,
+  //   DateModified:DateModified,
+  //   id : id,
+  // };
+
+  // userModel.push(resultData);
+
+  // console.log("req.body", req.body);
+  // console.log("req.query", req.query);
+  // console.log("req.params", req.params);
+  // res.status(200).send({
+  //   message:"Data added sucessfully",
+  //   userModel: userModel
+  // })
+  // ------------------------------------------------------------------------------------------------
+}
 
 // function updateUsers(req, res) {
 //   console.log("req.body", req.body);
@@ -261,8 +289,7 @@ function getUsers(req, res) {
 
 module.exports = {
   getUsers,
-  // ,
-  // addUsers,
+  addUsers,
   // updateUsers,
   // modifyUsers,
   // removeUsers,
