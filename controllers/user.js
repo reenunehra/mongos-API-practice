@@ -7,6 +7,30 @@ const userAddModel = require("../models/userAddress");
 function getUsers(req, res) {
   async.waterfall(
     [
+// -------------------------------------------get all user names in order by name---------------
+      function (cb) {
+        userModel.find({}).sort({name: 1}).exec(function(err, UsersData) {
+        
+          if (err) {
+            console.log(err);
+            cb(true);
+          }
+          cb(null,UsersData); 
+        });
+      }
+    ],
+   (err, UsersData) => {
+      if (err) {     
+        res.status(400).json({ success: false, err: err });
+      } else {
+        let data = {          
+          Users: UsersData
+        };
+        res.status(200).json({ success: true, data: data });
+      }
+    }
+  );
+}
       // ------------------------------updateMany------------------------------------
       // function (cb) {
       //   userModel.updateMany({age:{$gte:25}},
@@ -191,106 +215,345 @@ function getUsers(req, res) {
       //   );
       // },
 
-      //find
+//--------------------------------------find-----get---------------------------------------------
+//       function (cb) {
+//         userModel.find({}, (err, UsersData) => {
+//           if (err) {
+//             console.log(err);
+//             cb(true, UsersData);
+//           }
+//           cb(null, UsersData); 
+//         });
+//       },
+
+//       //address
+//       function (UsersData, cb) {
+//         userAddModel.find({}, (err, userAddressData) => {
+//           if (err) {
+//             cb(true, userAddressData);
+//           }
+
+//           cb(null, UsersData, userAddressData);
+//         });
+//       },
+//     ],
+
+//     (err, UsersData, userAddressData) => {
+//       if (err) {     
+//         res.status(400).json({ success: false, err: err });
+//       } else {
+//         let data = {
+//           address: userAddressData,
+//           Users: UsersData,
+//         };
+//         res.status(200).json({ success: true, data: data });
+//       }
+//     }
+//   );
+// }
+//------------------------------------post---------------------------------------------------------------
+
+function addUsers(req, res) {
+  async.waterfall([
+    function (cb) {
+      // console.log(typeof req.body);
+      const obj = {
+        name: req.body.name,
+        status: req.body.status,
+      };
+
+      const user = new userModel(obj);
+
+      user.save().then(() => {
+          cb(null, user);
+        }).catch((e) => {
+          cb(true);
+        });
+
+    },
+
+    function (user, cb) {
+
+      const obj2 = {
+        Pincode: req.body.Pincode,
+        address: req.body.address,
+        userID: user._id
+      };
+
+      const useraddresses = new userAddModel(obj2);
+
+      useraddresses.save().then(() => {
+          cb(null,user, useraddresses);
+        })
+        .catch((e) => {
+          console.log(e);
+          cb(true);
+        });
+    },
+  ],
+  (err, user, useraddresses) => {
+    if (err) {
+      res.status(400).json({ success: false, err: err });
+    } else {
+      let data = {
+        Users: user,
+        address: useraddresses
+      };
+      res.status(200).json({ success: true, data: data });
+    }
+  }  
+  );
+}
+// ---------------------------------------putAPI-----api/v1/updateuser/:<id> - add user with address----------------------------------------------------
+
+// function updateUsers(req, res) {  
+//   console.log("req.params", req.params);
+//     async.waterfall([
+//       function (cb) {
+//         let name_id = "6288848d5484a93fa3538d32"
+//         userModel.findByIdAndUpdate(name_id, {name:"RJatin"},(err, findData)=>{       
+  
+//           if(err){
+//             cb(true);
+//           }else{
+//             console.log("finddata",findData)
+//             cb(null, findData)
+//           }
+//         })
+//       },
+  
+//       function (findData, cb) {       
+  
+//         let name_id = "62877545720666a32c784170"
+//         console.log(name_id);
+//         userAddModel.findByIdAndUpdate(name_id, {address:"blog5000"},(err, findDatas)=>{       
+  
+//           if(err){
+
+//             cb(true);
+//           }else{
+//             console.log("finddata",findDatas)
+//             cb(null,findData,findDatas)
+//           }
+//         })
+//       }
+//     ],
+//     (err, findData, findDatas) => {
+//       if (err) {
+//         res.status(400).json({ success: false, err: err });
+//       } else {
+//         let data = {
+//           Users: findData,
+//           address: findDatas
+//         };
+//         res.status(200).json({ success: true, data: data });
+//       }
+//     }  
+//     );
+//   }
+
+// ----------------------------------------findOneAndUpdate------$set----------put-----------------------
+// function updateUsers(req, res) {  
+//   console.log("req.params", req.params);
+
+//     async.waterfall([
+//       function (cb) {
+        
+//         userModel.findOneAndUpdate({_id: req.params.id},{$set:{name: "Rishi"}},(err, findData)=>{       
+  
+//           if(err){
+//             console.log(err);
+//             cb(true); 
+//           }else{
+//             console.log("finddata",findData)
+//             cb(null, findData)
+//           }
+//         })
+//       },
+  
+//       function (findData, cb) {       
+  
+        
+//         userAddModel.findOneAndUpdate({userID: req.params.id},{$set:{address: "RishiHome"}},(err, findDatas)=>{       
+  
+//           if(err){
+//             console.log(err);
+//             cb(true);
+//           }else{
+//             console.log("finddata",findDatas)
+//             cb(null,findData,findDatas)
+//           }
+//         })
+//       }
+//     ],
+//     (err, findData, findDatas) => {
+//       if (err) {
+//         res.status(400).json({ success: false, err: err });
+//       } else {
+//         let data = {
+//           Users: findData,
+//           address: findDatas
+//         };
+//         res.status(200).json({ success: true, data: data });
+//       }
+//     }  
+//     );
+//   } 
+//--------------------------------------findOneAndUpdate-------$unset----------put--------------
+function updateUsers(req, res) {  
+  console.log("req.params", req.params);
+
+    async.waterfall([
       function (cb) {
-        userModel.find({}, (err, UsersData) => {
-          if (err) {
+        
+        userModel.findOneAndUpdate({_id: req.params.id},{$unset:{name: 1}},(err, findData)=>{       
+  
+          if(err){
             console.log(err);
-            cb(true, UsersData);
+            cb(true); 
+          }else{
+            console.log("finddata",findData)
+            cb(null, findData)
           }
-          cb(null, UsersData);
-        });
+        })
       },
-
-      //address
-      function (UsersData, cb) {
-        userAddModel.find({}, (err, userAddressData) => {
-          if (err) {
-            cb(true, userAddressData);
+  
+      function (findData, cb) {       
+  
+        
+        userAddModel.findOneAndUpdate({userID: req.params.id},{$unset:{address: "blog5000"}},(err, findDatas)=>{       
+  
+          if(err){
+            console.log(err);
+            cb(true);
+          }else{
+            console.log("finddata",findDatas)
+            cb(null,findData,findDatas)
           }
-
-          cb(null, UsersData, userAddressData);
-        });
-      },
+        })
+      }
     ],
-
-    (err, UsersData, userAddressData) => {
+    (err, findData, findDatas) => {
       if (err) {
         res.status(400).json({ success: false, err: err });
       } else {
         let data = {
-          address: userAddressData,
-          Users: UsersData,
+          Users: findData,
+          address: findDatas
         };
         res.status(200).json({ success: true, data: data });
       }
-    }
-  );
-}
-//------------------------------------post---------------------------------------------------------------
-function addUsers(req, res) {
-  console.log(req.body);
-  const user = new userModel(req.body);
+    }  
+    );
+  } 
 
-  user.save().then(() => {
-      res.status(201).send(user);
-    }).catch((e) => {
-      res.status(400).send(e);
-    });
 
-// --------------------------------------------------------------------------------------------
-  // let username = req.body.name;
-  // let status = req.body.status;
-  // let Datecreated = req.body.Datecreated;
-  // let DateModified = req.body.DateModified;
-  // let id = userModel.length + 1;
 
-  // let resultData = {
-  //   name: username,
-  //   status: status,
-  //   Datecreated:Datecreated,
-  //   DateModified:DateModified,
-  //   id : id,
-  // };
 
-  // userModel.push(resultData);
+// -------------------------------------------modifyUsers--------- patch------------------------------------------
+function modifyUsers(req, res) {
+  
+    console.log("req.params", req.params);
+  
+      async.waterfall([
+        function (cb) {
+          
+          userModel.findOneAndUpdate({_id: req.params.id},{$set:{status: true}},(err, findData)=>{       
+    
+            if(err){
+              console.log(err);
+              cb(true);     
+            }else{
+              console.log("finddata",findData)
+              cb(null, findData)
+            }
+          })
+        },
+    
+        function (findData, cb) {       
+    
+          
+          userAddModel.findOneAndUpdate({userID: req.params.id},{$set:{address: "Home"}},(err, findDatas)=>{       
+    
+            if(err){
+              console.log(err);
+              cb(true);
+            }else{
+              console.log("finddata",findDatas)
+              cb(null,findData,findDatas)
+            }
+          })
+        }
+      ],
+      (err, findData, findDatas) => {
+        if (err) {
+          res.status(400).json({ success: false, err: err });
+        } else {
+          let data = {
+            Users: findData,
+            address: findDatas
+          };
+          res.status(200).json({ success: true, data: data });
+        }
+      }  
+      );
+    }    
 
-  // console.log("req.body", req.body);
-  // console.log("req.query", req.query);
-  // console.log("req.params", req.params);
-  // res.status(200).send({
-  //   message:"Data added sucessfully",
-  //   userModel: userModel
-  // })
-  // ------------------------------------------------------------------------------------------------
-}
+// ----------------------------------------------DeleteData----------------------------------------------------
 
-// function updateUsers(req, res) {
-//   console.log("req.body", req.body);
-//   console.log("req.query", req.query);
-//   console.log("req.params", req.params);
+function removeUsers(req, res) {
 
-//   res.send("put request");
-// }
-// function modifyUsers(req, res) {
-//   console.log("req.body", req.body);
-//   console.log("req.query", req.query);
-//   console.log("req.params", req.params);
-
-//   res.send("patch request");
-// }
-// function removeUsers(req, res) {
-//   console.log("req.body", req.body);
-//   console.log("req.query", req.query);
-//   console.log("req.params", req.params);
-
-//   res.send("delete request");
-// }
+  
+    console.log("req.params", req.params);
+  
+    async.waterfall([
+      function (cb) {
+        
+        userModel.findOneAndDelete({_id: req.params.id},{$set:{status: true}},(err, removeData)=>{       
+  
+          if(err){
+            console.log(err);
+            cb(true);     
+          }else{
+            console.log("removedata",removeData)
+            cb(null, removeData)
+          }
+        })
+      },
+  
+      function (removeData, cb) {       
+  
+        
+        userAddModel.findOneAndDelete({userID: req.params.id},{$set:{address: "Home"}},(err, removeDatas)=>{       
+  
+          if(err){
+            console.log(err);
+            cb(true);
+          }else{
+            console.log("finddata",removeDatas)
+            cb(null,removeData,removeDatas)
+          }
+        })
+      }
+    ],
+    (err, removeData, removeDatas) => {
+      if (err) {
+        res.status(400).json({ success: false, err: err });
+      } else {
+        let data = {
+          Users: removeData,
+          address: removeDatas
+        };
+        res.status(200).json({ success: true, data: data });
+      }
+    }  
+    );
+  }    
 
 module.exports = {
   getUsers,
   addUsers,
-  // updateUsers,
-  // modifyUsers,
-  // removeUsers,
+  updateUsers,
+  modifyUsers,
+  removeUsers,
 };

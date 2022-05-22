@@ -5,11 +5,9 @@ const controller = require('../controllers/user')
 
 router.get('/users', controller.getUsers);
 router.post('/users', controller.addUsers);
-// router.put('/users', controller.updateUsers);
-// router.patch('/users', controller.modifyUsers);
-// router.delete('/users', controller.removeUsers);
-// router.get('user', );
-// router.get('username', );
-// router.post('',) 
+router.put('/users/:id', controller.updateUsers);
+router.patch('/users/:id', controller.modifyUsers);
+router.delete('/users/:id', controller.removeUsers);
+
 
 module.exports = router;
