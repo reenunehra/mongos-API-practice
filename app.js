@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const app = express();
 const port = 3000;
 const userRoutes = require('./routes/user');
+const cors = require('cors');
 
 mongoose.connect('mongodb://localhost:27017/userDetails',
   {
@@ -10,6 +11,7 @@ mongoose.connect('mongodb://localhost:27017/userDetails',
     
   }
 );
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 

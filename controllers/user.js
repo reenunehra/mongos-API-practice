@@ -1,6 +1,4 @@
 const async = require("async");
-const { status } = require("express/lib/response");
-const res = require("express/lib/response");
 const userModel = require("../models/user");
 const userAddModel = require("../models/userAddress");
 
@@ -43,8 +41,8 @@ function getUsers(req, res) {
             console.log(err);
             cb(true, UsersData);
           }
-          cb(null, UsersData); 
-        });
+          cb(null, UsersData);  
+        }); 
       },
 
       //address
@@ -75,17 +73,21 @@ function getUsers(req, res) {
 
 // ----------------------------------------findOneAndUpdate------$set----------put-----------------------
 function getUsersID(req, res) {  
-  console.log("req.params", req.params);
+  console.log("getUsersID");
+  console.log("req.params", req.params);   //get//properties attached to the url,prefix the parameter name with a colon(:) when writing routes.
+  console.log("req.body", req.body); //Generally used in POST/PUT requests.
+  console.log("req.query", req.query); //req.query is mostly used for searching,sorting, filtering, pagination........exm - GET  http://localhost:3000/animals?page=10
 
     async.waterfall([
       function (cb) {
         
-        userModel.findOneAndUpdate({_id: req.params.id},{$set:{name: "Rishi"}},(err, findData)=>{       
+        userModel.find({_id: req.query.id,status: true},(err, findData)=>{       
   
           if(err){
             console.log(err);
             cb(true); 
           }else{
+            
             console.log("finddata",findData)
             cb(null, findData)
           }
@@ -94,14 +96,14 @@ function getUsersID(req, res) {
   
       function (findData, cb) {    
 
-        userAddModel.findOneAndUpdate({userID: req.params.id},{$set:{address: "RishiHome"}},(err, findDatas)=>{       
+        userAddModel.find({userID: req.query.id},(err, findDatas)=>{       
   
           if(err){
             console.log(err);
             cb(true);
           }else{
             console.log("finddata",findDatas)
-            cb(null,findData,findDatas)
+            cb(null,findData, findDatas)
           }
         })
       }
